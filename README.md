@@ -1,117 +1,108 @@
 # Automated DevOps Deployment for Pet Shop Application
 
-## Overview
-This project automates the deployment of the **Pet Shop Application** using DevOps best practices, including CI/CD pipelines, containerization with Docker, and Kubernetes orchestration.
+![image](https://github.com/user-attachments/assets/c638fba0-1e28-4f0e-aa0f-4d91196ab198)
 
-## Objectives
-- Automate the deployment process using **Bash scripts**.
-- Implement a **CI/CD pipeline** with Jenkins.
+## 📌 Project Overview
+This project automates the deployment of the **Pet Shop Application** using DevOps best practices. The setup includes **version control, CI/CD pipelines, containerization, and Kubernetes orchestration** to ensure seamless deployments.
+
+## 🎯 Objectives
+- Automate deployment with **Bash scripts**.
+- Implement a **CI/CD pipeline** for continuous integration and delivery.
 - Utilize **Docker** for containerization.
-- Deploy and manage Kubernetes clusters on **AWS EKS**.
-- Implement **Infrastructure as Code (IaC)** for provisioning.
+- Deploy and manage **Kubernetes clusters** for scalability.
+- Implement **Infrastructure as Code (IaC)** for automated provisioning.
 
-## Requirements
-### Prerequisites
+## 🏗️ Deployment Process
+
+### 🔹 Prerequisites
 - GitHub, Docker Hub, and AWS accounts.
-- AWS EC2 instances:
+- EC2 instances for:
   - **Jenkins Master**
-  - **Agent Machine**
-  - **EKS Machine**
-- Recommended: **t3.medium instances with 15GB RAM** (for practice only; adjust for production).
+  - **Jenkins Agent**
+  - **EKS Cluster Machine**
 
-## Setup & Configuration
-### 1. Jenkins Master Server
-- Install Jenkins:
-  ```sh
-  sudo wget -O /etc/yum.repos.d/Jenkins.repo \ 
-    https://pkg.jenkins.io/redhat-stable/jenkins.repo
-  sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-  sudo yum upgrade
-  sudo yum install fontconfig java-17-openjdk
-  sudo yum install jenkins
-  sudo systemctl daemon-reload
-  sudo systemctl enable jenkins
-  sudo systemctl start jenkins
-  ```
-- Open Jenkins UI: `http://<your-server-ip>:8080`
+### 🔹 Jenkins Master Setup
+```bash
+sudo wget -O /etc/yum.repos.d/Jenkins.repo \ 
+  https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo yum upgrade
+sudo yum install fontconfig java-17-openjdk
+sudo yum install jenkins
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+```
+- Access Jenkins UI: `http://<jenkins-master-ip>:8080`
 - Install required plugins:
-  - Git, Maven Integration, Docker Pipeline, Kubernetes CLI, etc.
+  - Git
+  - Maven Integration
+  - Docker Pipeline
+  - Kubernetes CLI
 
-### 2. Agent Machine Setup
-- Install dependencies:
-  ```sh
-  sudo yum install git maven -y
-  sudo yum install java-17-openjdk -y
-  sudo yum install docker -y
-  ```
-- Configure SSH authentication:
-  ```sh
-  sudo vim /etc/ssh/sshd_config  # Enable PubkeyAuthentication
-  sudo systemctl restart sshd
-  ssh-keygen -t rsa
-  cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-  ```
-
-### 3. Master-Slave Configuration
-- In Jenkins:
-  - **Manage Jenkins** → **Manage Nodes and Clouds**
-  - Add a new node (**Jenkins-Agent**), set executors to **2**.
-  - Use SSH for connection (provide private key credentials).
-  - Verify agent is connected.
-
-## CI/CD Pipeline Implementation
-### 1. Create `deployment.sh`
-```sh
-#!/bin/bash
-BUILD_NUMBER=$1
-REPO_URL="git@github.com:yourrepo/petshop.git"
-DEPLOYMENT_YAML="k8s/deployment.yaml"
-
-# Clone repository
-if [ ! -d "petshop" ]; then
-  git clone $REPO_URL
-else
-  cd petshop && git pull origin main
-fi
-
-# Update Docker image version in deployment YAML
-sed -i "s|image: petshop:.*|image: petshop:$BUILD_NUMBER|g" $DEPLOYMENT_YAML
-
-docker build -t petshop:$BUILD_NUMBER .
-docker tag petshop:$BUILD_NUMBER your-dockerhub-repo/petshop:$BUILD_NUMBER
-docker push your-dockerhub-repo/petshop:$BUILD_NUMBER
+### 🔹 Jenkins Agent Setup
+```bash
+sudo yum install git maven -y
+sudo yum install java-17-openjdk -y
+sudo yum install docker -y
+```
+- **SSH Setup for Agent**
+```bash
+ssh-keygen -t rsa -b 4096
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+sudo systemctl restart sshd
 ```
 
-### 2. Jenkins Job-1: Build & Push Docker Image
-- **Trigger**: On GitHub push.
-- **Steps**:
-  - Clone the repository.
-  - Build and push Docker image.
+## ⚙️ CI/CD Pipeline
 
-### 3. Jenkins Job-2: Kubernetes Deployment
-- Create `k8-deploy.sh`:
-```sh
+### 📌 Job 1 - Build & Push Docker Image
+1. Jenkins pulls the latest code from GitHub.
+2. Runs tests and builds the application.
+3. Builds a **Docker image** and pushes it to Docker Hub.
+
+```bash
+# deployment.sh
 #!/bin/bash
-kubectl apply -f k8s/deployment.yaml
+git clone <repo_url> || (cd <repo_name> && git pull)
+docker build -t my-app:latest .
+docker tag my-app:latest my-dockerhub-repo/my-app:latest
+docker push my-dockerhub-repo/my-app:latest
 ```
-- **Trigger**: After Job-1 succeeds.
 
-## Kubernetes Deployment on AWS EKS
-- Install and configure **kubectl** and **AWS CLI**.
-- Deploy application:
-  ```sh
-  kubectl apply -f k8s/deployment.yaml
-  kubectl get pods -n petshop
-  ```
+![image](https://github.com/user-attachments/assets/a3ffc91d-332b-4742-8b5a-c0331ecce643)
+![image](https://github.com/user-attachments/assets/8ec283d5-a71d-43a0-922d-8824ecf33852)
 
-## Conclusion
-This project automates the full DevOps deployment lifecycle for the **Pet Shop Application**, ensuring efficiency, reliability, and scalability using **Jenkins, Docker, and Kubernetes**.
+### 📌 Job 2 - Kubernetes Deployment
+1. Pulls the latest Kubernetes **deployment YAML**.
+2. Applies the updated **Kubernetes configuration**.
 
-## Technologies Used
-- **Jenkins** (CI/CD)
-- **Docker** (Containerization)
-- **Kubernetes** (Orchestration on AWS EKS)
-- **GitHub** (Version Control)
-- **AWS EC2** (Infrastructure)
+```bash
+# k8-deploy.sh
+#!/bin/bash
+git clone <repo_url> || (cd <repo_name> && git pull)
+kubectl apply -f deployment.yaml
+```
+
+![image](https://github.com/user-attachments/assets/da72978d-bb8c-49fc-8a0a-f00e993c4e5f)
+![image](https://github.com/user-attachments/assets/0437fb27-6d2b-42a7-a154-af126712dd53)
+
+## 📜 Infrastructure Overview
+- **EC2 instances** for Jenkins, Agent, and EKS setup.
+- **Security configurations & IAM roles**.
+- **Load Balancer for smooth application access**.
+
+## 🛠️ Technologies Used
+- **Jenkins** for CI/CD Automation
+- **Docker** for Containerization
+- **SonarQube** for Code Quality Analysis
+- **Kubernetes (EKS)** for Orchestration
+- **GitHub** for Version Control
+- **AWS** for Cloud Infrastructure
+
+## 📢 Contributing
+Feel free to submit **pull requests** for improvements!
+
+## 📧 Contact
+For queries, reach out via **[email@gmail.com](mailto:lakshminarayanas386@gmail.com)**.
 
 ---
+🚀 **End-to-End DevOps CI/CD Automation for Scalable Deployments!**
