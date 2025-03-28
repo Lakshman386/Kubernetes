@@ -102,7 +102,7 @@ kubectl apply -f deployment.yaml
 Feel free to submit **pull requests** for improvements!
 
 ## 📧 Contact
-For queries, reach out via **[email@gmail.com](mailto:lakshminarayanas386@gmail.com)**.
+For queries, reach out via **[@email.com](mailto:lakshminarayanas386@gmail.com)**.
 
 ---
 🚀 **End-to-End DevOps CI/CD Automation for Scalable Deployments!**
