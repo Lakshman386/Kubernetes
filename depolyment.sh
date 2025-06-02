@@ -12,9 +12,9 @@ GIT_BRANCH="main"
 
 # Sensitive credentials (use environment variables or a secret manager)
 GIT_USERNAME="Lakshman386"
-GIT_PERSONAL_ACCESS_TOKEN="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"
+GIT_PERSONAL_ACCESS_TOKEN="token"
 DOCKER_USERNAME="lakshman386"
-DOCKER_PASSWORD="Lakshman1234@"
+DOCKER_PASSWORD="<Docker passwed>"
 
 # Step 1: Git Checkout
 echo "Checking out the repository..."
